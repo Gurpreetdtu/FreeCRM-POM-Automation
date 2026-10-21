@@ -1,1 +1,7 @@
-/target/
+
+target/
+.idea/
+*.iml
+test-output/
+*.log
+git status
