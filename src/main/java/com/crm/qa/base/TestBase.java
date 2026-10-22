@@ -1,3 +1,4 @@
+
 package com.crm.qa.base;
 
 import java.io.FileInputStream;
@@ -6,10 +7,8 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.log4j.Logger;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.events.EventFiringWebDriver;
 
@@ -17,60 +16,65 @@ import com.crm.qa.util.TestUtil;
 import com.crm.qa.util.WebEventListener;
 
 public class TestBase {
-	
+
 	public static WebDriver driver;
 	public static Properties prop;
-	public  static EventFiringWebDriver e_driver;
+	public static EventFiringWebDriver e_driver;
 	public static WebEventListener eventListener;
-	
-	public TestBase(){
+
+	public TestBase() {
 		try {
 			prop = new Properties();
-			FileInputStream ip = new FileInputStream(System.getProperty("user.dir")+ "/src/main/java/com/crm"
-					+ "/qa/config/config.properties");
+
+			String configPath = System.getProperty("user.dir")
+					+ "/src/main/java/com/crm/qa/config/config.properties";
+
+			FileInputStream ip = new FileInputStream(configPath);
 			prop.load(ip);
+			ip.close();
+
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			throw new RuntimeException("config.properties file not found.", e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new RuntimeException("Unable to load config.properties.", e);
 		}
 	}
-	
-	
-	public static void initialization(){
+
+	public static void initialization() {
+
 		String browserName = prop.getProperty("browser");
-		
-		if(browserName.equals("chrome")){
-			System.setProperty("webdriver.chrome.driver", "/Users/naveenkhunteta/Downloads/chromedriver");	
-			driver = new ChromeDriver(); 
+
+		if (browserName == null || browserName.trim().isEmpty()) {
+			throw new RuntimeException(
+					"Browser is not configured in config.properties");
 		}
-		else if(browserName.equals("FF")){
-			System.setProperty("webdriver.gecko.driver", "/Users/naveenkhunteta/Documents/SeleniumServer/geckodriver");	
-			driver = new FirefoxDriver(); 
+
+		if (browserName.equalsIgnoreCase("chrome")) {
+			driver = new ChromeDriver();
+
+		} else if (browserName.equalsIgnoreCase("FF")
+				|| browserName.equalsIgnoreCase("firefox")) {
+			driver = new FirefoxDriver();
+
+		} else {
+			throw new RuntimeException(
+					"Unsupported browser: " + browserName);
 		}
-		
-		
+
 		e_driver = new EventFiringWebDriver(driver);
-		// Now create object of EventListerHandler to register it with EventFiringWebDriver
 		eventListener = new WebEventListener();
 		e_driver.register(eventListener);
 		driver = e_driver;
-		
+
 		driver.manage().window().maximize();
 		driver.manage().deleteAllCookies();
-		driver.manage().timeouts().pageLoadTimeout(TestUtil.PAGE_LOAD_TIMEOUT, TimeUnit.SECONDS);
-		driver.manage().timeouts().implicitlyWait(TestUtil.IMPLICIT_WAIT, TimeUnit.SECONDS);
-		
-		driver.get(prop.getProperty("url"));
-		
-	}
-	
-	
-	
-	
-	
-	
-	
-	
 
+		driver.manage().timeouts().pageLoadTimeout(
+				TestUtil.PAGE_LOAD_TIMEOUT, TimeUnit.SECONDS);
+
+		driver.manage().timeouts().implicitlyWait(
+				TestUtil.IMPLICIT_WAIT, TimeUnit.SECONDS);
+
+		driver.get(prop.getProperty("url"));
+	}
 }
