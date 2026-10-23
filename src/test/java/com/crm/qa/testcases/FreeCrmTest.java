@@ -20,9 +20,11 @@ public class FreeCrmTest {
 
 	@BeforeMethod
 	public void setUp() throws Exception {
-		System.setProperty("webdriver.chrome.driver", "/Users/naveenkhunteta/Downloads/chromedriver");
+
 		driver = new ChromeDriver();
+
 		js = (JavascriptExecutor) driver;
+
 		driver.get("https://www.freecrm.com/index.html");
 	}
 
@@ -32,8 +34,7 @@ public class FreeCrmTest {
 		System.out.println("title is: " + title);
 		getRunTimeInfoMessage("info", title);
 
-		if (title.equals("Free CRM software in the cloud powers sales and customer serviceQQQQ")) {
-			getRunTimeInfoMessage("info", "title is correct!! YAY!!!");
+		if (title.equals("Free CRM software in the cloud powers sales and customer service")) {			getRunTimeInfoMessage("info", "title is correct!! YAY!!!");
 			Assert.assertTrue(true);
 		} else {
 			getRunTimeInfoMessage("error", "title is not correct!! BUG BUG BUG!!!");
@@ -82,9 +83,13 @@ public class FreeCrmTest {
 		// Take screenshot and store as a file format
 		File src = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
 		// now copy the screenshot to desired location using copyFile //method
-		FileUtils.copyFile(src, 
-				new File("/Users/NaveenKhunteta/Documents/MyPOMFramework/PageObjectModel/screenshots/" + fileName +".png"));
+		File screenshotFolder = new File("screenshots");
 
+		if (!screenshotFolder.exists()) {
+			screenshotFolder.mkdirs();
+		}
+
+		FileUtils.copyFile(src, new File(screenshotFolder, fileName + ".png"));
 	}
 
 }
