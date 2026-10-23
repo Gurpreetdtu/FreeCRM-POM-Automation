@@ -1,4 +1,4 @@
-
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -15,6 +15,8 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.release>17</maven.compiler.release>
+		<selenium.version>4.16.1</selenium.version>
+		<testng.version>7.11.0</testng.version>
 	</properties>
 
 	<dependencies>
@@ -23,14 +25,14 @@
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-java</artifactId>
-			<version>3.14.0</version>
+			<version>${selenium.version}</version>
 		</dependency>
 
-		<!-- TestNG test framework -->
+		<!-- TestNG: available during main-source and test compilation -->
 		<dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
-			<version>7.11.0</version>
+			<version>${testng.version}</version>
 		</dependency>
 
 		<!-- Apache POI for Excel test data -->
@@ -40,13 +42,12 @@
 			<version>3.17</version>
 		</dependency>
 
-g
+		<!-- Log4j -->
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 			<version>1.2.17</version>
 		</dependency>
-
 
 		<!-- ExtentReports -->
 		<dependency>
@@ -55,7 +56,7 @@ g
 			<version>2.41.2</version>
 		</dependency>
 
-		<!-- File and stream utilities -->
+		<!-- File utilities -->
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
@@ -67,7 +68,7 @@ g
 	<build>
 		<plugins>
 
-			<!-- Compile the project using Java 17 -->
+			<!-- Java 17 compiler -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -75,6 +76,13 @@ g
 				<configuration>
 					<release>17</release>
 				</configuration>
+			</plugin>
+
+			<!-- Execute TestNG tests through Maven -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.5.2</version>
 			</plugin>
 
 		</plugins>

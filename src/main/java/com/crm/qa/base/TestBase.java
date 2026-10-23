@@ -1,17 +1,17 @@
 
-package com.crm.qa.base;
+		package com.crm.qa.base;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.events.EventFiringWebDriver;
-
 import com.crm.qa.util.TestUtil;
 import com.crm.qa.util.WebEventListener;
 
@@ -23,20 +23,19 @@ public class TestBase {
 	public static WebEventListener eventListener;
 
 	public TestBase() {
-		try {
-			prop = new Properties();
+		prop = new Properties();
 
-			String configPath = System.getProperty("user.dir")
-					+ "/src/main/java/com/crm/qa/config/config.properties";
+		String configPath = System.getProperty("user.dir")
+				+ "/src/main/java/com/crm/qa/config/config.properties";
 
-			FileInputStream ip = new FileInputStream(configPath);
+		try (FileInputStream ip = new FileInputStream(configPath)) {
 			prop.load(ip);
-			ip.close();
-
 		} catch (FileNotFoundException e) {
-			throw new RuntimeException("config.properties file not found.", e);
+			throw new RuntimeException(
+					"config.properties not found: " + configPath, e);
 		} catch (IOException e) {
-			throw new RuntimeException("Unable to load config.properties.", e);
+			throw new RuntimeException(
+					"Unable to load config.properties.", e);
 		}
 	}
 
@@ -50,10 +49,23 @@ public class TestBase {
 		}
 
 		if (browserName.equalsIgnoreCase("chrome")) {
-			driver = new ChromeDriver();
 
-		} else if (browserName.equalsIgnoreCase("FF")
-				|| browserName.equalsIgnoreCase("firefox")) {
+			ChromeOptions options = new ChromeOptions();
+
+			if ("true".equalsIgnoreCase(System.getenv("CI"))) {
+				options.addArguments(
+						"--headless=new",
+						"--no-sandbox",
+						"--disable-dev-shm-usage",
+						"--window-size=1920,1080"
+				);
+			}
+
+			driver = new ChromeDriver(options);
+
+		} else if (browserName.equalsIgnoreCase("firefox")
+				|| browserName.equalsIgnoreCase("FF")) {
+
 			driver = new FirefoxDriver();
 
 		} else {
@@ -66,15 +78,22 @@ public class TestBase {
 		e_driver.register(eventListener);
 		driver = e_driver;
 
-		driver.manage().window().maximize();
 		driver.manage().deleteAllCookies();
 
 		driver.manage().timeouts().pageLoadTimeout(
-				TestUtil.PAGE_LOAD_TIMEOUT, TimeUnit.SECONDS);
+				Duration.ofSeconds(TestUtil.PAGE_LOAD_TIMEOUT));
 
 		driver.manage().timeouts().implicitlyWait(
-				TestUtil.IMPLICIT_WAIT, TimeUnit.SECONDS);
+				Duration.ofSeconds(TestUtil.IMPLICIT_WAIT));
 
-		driver.get(prop.getProperty("url"));
+		String url = prop.getProperty("url");
+
+		if (url == null || url.trim().isEmpty()) {
+			throw new RuntimeException(
+					"Application URL is missing in config.properties");
+		}
+
+		driver.get(url);
+		driver.manage().window().maximize();
 	}
 }
